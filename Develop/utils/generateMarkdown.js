@@ -1,136 +1,73 @@
-// TODO: Include packages needed for this application
-const inquirer = require('inquirer');
-const fs = require('fs');
+// generateMarkdown.js
+function renderLicenseBadge(license) {
+  const licenseBadges = {
+    'MIT': '[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)',
+    'ISC': '[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)',
+    'IBM': '[![License: IPL 1.0](https://img.shields.io/badge/License-IPL_1.0-blue.svg)](https://opensource.org/licenses/IPL-1.0)'
+  };
 
-const renderLicense = require('.utils/generateMarkdown');
-// TODO: Create an array of questions for user input
-const questions = [];
-const questions = [
-    {
-        type: "input",
-        message: "What's the title?",
-        name: "titile"
-    },
-    {
-        type: "input",
-        message: "Discribe your project.",
-        name: "description"
-    },
-    {
-        type: "input",
-        message: "What is #1 in your table of contents?",
-        name: "one"
-    },
-    {
-        type: "input",
-        message: "What is #2 in your table of contents?",
-        name: "two"
-    },
-    {
-        type: "input",
-        message: "What is #3 in your table of contents?",
-        name: "three"
-    },
-    {
-        type: "input",
-        message: "What is #4 in your table of contents?",
-        name: "four"
-    },
+  return licenseBadges[license] || '';
+}
 
-    {
-        type: "input",
-        message: "What is #5 in your table of contents?",
-        name: "five"
-    },
-    {
-        type: "input",
-        message: "How do you install your application?",
-        name: "install"
-    },
-    {
-        type: "input",
-        message: "What is your app used for?",
-        name: "use"
-    },
-    {
-        type: "list",
-        message: "Which license will you use?",
-        choices: ["MIT", "ISC", "IBM"],
-        name: "license"
-    },
-    {
-        type: "input",
-        message: "How does another person contribute to your project?",
-        name: "contribute"
-    },
-    {
-        type: "input",
-        message: "Describe tests run on your project.",
-        name: "tests"
-    },
-    {
-        type: "input",
-        message: "What is your GitHub Username?",
-        name: "username"
-    },
-    {
-        type: "input",
-        message: "What is your email?",
-        name: "email"
-    },
-];
+function renderLicenseLink(license) {
+  const licenseLinks = {
+    'MIT': '[![License: MIT](https://opensource.org/licenses/MIT)]',
+    'ISC': '[![License: ISC](https://opensource.org/licenses/ISC)]',
+    'IBM': '[![License: IPL 1.0](https://opensource.org/licenses/IPL-1.0)]'
+  };
 
-inquirer
-    .createPromptModule(questions)
-    .then((answers) => {
-        const markdown = getMarkdown(answers);
-        fs.writeFile('README.md', markdown, (err) => {
-            if (err) {
-                console.error(err);
-            } else {
-                console.log("Write file success!");
-            }
-        });
-    });
+  return licenseLinks[license] || '';
+}
 
-const getMarkdown = (answers) => {
-    const { title, description, one, two, three, four, five, install, use, license, contribute, tests, username, email } = answers;
+function renderPicture(picture) {
+  if (picture) {
+    return `![Project Picture](${picture})\n\n`;
+  }
 
-    return `
-        # Title
-        ${title}
-        ## ${renderLicense(license)}
-        ## Despcription
-        ${description}
-        ## Table of Contents
-        1. ${one}
-        2. ${two}
-        3. ${three}
-        4. ${four}
-        5. ${five}
-        ## Installation
-        ${install}
-        ## Usage
-        ${use}
-        ## Contribution
-        ${contribute}
-        ## Tests
-        ${tests}
-        ## Username
-        ${username}
-        * https://github.com/mkd018210
-        ${email}
-        * Please email me if you need me!
-        `;
-    }
-// TODO: Create a function to write README file
-function writeToFile(fileName, data) {}
-function writeToFile(fileName, data) { }
+  return '';
+}
 
-// TODO: Create a function to initialize app
-function init() {}
-function init() { }
+function renderLicenseSection(data) {
+  const { license, picture } = data;
 
-// Function call to initialize app
-init();
- 83 changes: 80 additions & 3 deletions83  
+  let section = '';
+
+  if (license || picture) {
+    section += '\n## Additional Information\n\n';
+  }
+
+  if (license) {
+    section += `### License\n${renderLicenseBadge(license)}\n\n`;
+  }
+
+  section += renderPicture(picture);
+
+  return section;
+}
+
+function generateMarkdown(data) {
+  const { license } = data;
+
+  let markdown = `
+  # ${data.title}
+   ## ${renderLicenseBadge(license)}
+  
+   ## Description
+     ${data.description}
+  
+   ## Table of Contents
+     1. ${data.install}
+     2. ${data.usage}
+     3. ${renderLicenseLink(license)}
+     4. ${data.contributors}
+     5. ${data.tests}
+     6. ${data.githubUsername}
+     7. ${data.email}
+  `;
+
+  markdown += renderLicenseSection(data);
+
+  return markdown;
+}
+
+module.exports = generateMarkdown;
